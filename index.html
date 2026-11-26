@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paroles VR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Pacifico&family=Poppins:wght@600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#101218;--card:#1b1e27;--ln:#2c3140;--fg:#eef1f6;--mut:#9099ab;--acc:#8fb0ff;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.4 system-ui,sans-serif;padding:16px;max-width:1100px;margin-inline:auto}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+input[type=text],textarea,select{background:var(--card);color:var(--fg);border:1px solid var(--ln);border-radius:12px;padding:12px;font:inherit;min-width:0}
+.bar input{flex:1 1 200px}
+button{background:var(--acc);color:#0b1020;border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer}
+button.sec{background:var(--card);color:var(--fg);border:1px solid var(--ln)}
+.vid{aspect-ratio:16/9;max-width:640px;margin:12px auto 0;background:#000;border-radius:12px;overflow:hidden}
+.vid iframe{width:100%;height:100%;border:0}
+#msg{color:var(--mut);font-size:15px;margin:10px 0;min-height:1.4em}
+.stage{min-height:220px;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:12px;background:repeating-conic-gradient(#171a21 0 25%,#0c0d11 0 50%) 0 0/28px 28px}
+#lyr{width:var(--w);max-height:var(--h);overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:.35em;padding:.6em 1em;border-radius:16px;font-size:var(--fs);font-family:var(--ff);text-align:var(--al);background:var(--bgc)}
+.line{width:fit-content;max-width:100%;align-self:var(--as);color:var(--ct);opacity:calc(var(--ot)*.4);text-shadow:var(--sh);line-height:1.25;overflow-wrap:anywhere}
+.line.cur{color:var(--ca);opacity:var(--ot)}
+.cur.fade{animation:fade var(--ad) ease both}
+.cur.slide{animation:slide var(--ad) ease-out both}
+.cur.zoom{animation:zoom var(--ad) cubic-bezier(.2,1.4,.4,1) both}
+.cur.kar{color:transparent;text-shadow:none;background:linear-gradient(90deg,var(--ca) 50%,var(--ct) 50%) 100% 0/200% 100%;-webkit-background-clip:text;background-clip:text;animation:kar var(--kd) linear forwards}
+@keyframes fade{from{opacity:0}}
+@keyframes slide{from{transform:translateY(45%);opacity:0}}
+@keyframes zoom{from{transform:scale(.6);opacity:0}}
+@keyframes kar{to{background-position:0 0}}
+summary{cursor:pointer;padding:14px 0;font-weight:600}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin:6px 0 16px}
+label span{display:block;color:var(--mut);font-size:15px;margin-bottom:6px}
+label b{color:var(--fg)}
+.set input[type=range]{width:100%;height:34px;accent-color:var(--acc)}
+.set input[type=color]{width:100%;height:46px;border:1px solid var(--ln);border-radius:12px;background:var(--card);padding:4px}
+.set input[type=checkbox]{width:32px;height:32px;accent-color:var(--acc)}
+.set select{width:100%}
+textarea{width:100%;height:160px;margin-bottom:8px}
+#back{display:none;position:fixed;right:12px;top:12px}
+.clean .tools{display:none}
+.clean .vid{max-width:340px}
+.clean #back{display:block}
+@media (prefers-reduced-motion:reduce){.cur{animation:none!important}}
+</style>
+</head>
+<body>
+<button id="back" class="sec">Réglages</button>
+<div class="tools">
+  <div class="bar" style="margin-top:0"><input id="url" type="text" inputmode="url" placeholder="Colle un lien YouTube"><button id="go">Lancer</button></div>
+</div>
+<div class="vid"><div id="yt"></div></div>
+<div class="tools">
+  <div class="bar"><input id="ar" type="text" placeholder="Artiste"><input id="ti" type="text" placeholder="Titre"><button id="se" class="sec">Chercher les paroles</button></div>
+</div>
+<p id="msg">Colle un lien YouTube et appuie sur Lancer. L’aperçu ci-dessous suit tes réglages.</p>
+<div class="stage"><div id="lyr"></div></div>
+<div class="tools">
+  <details open><summary>Réglages d’affichage</summary>
+    <div id="set" class="set"></div>
+    <button id="rst" class="sec">Réinitialiser</button> <button id="cl">Mode épuré</button>
+  </details>
+  <details><summary>Coller mes propres paroles (.lrc)</summary>
+    <textarea id="lrc" placeholder="[00:12.30] Première ligne&#10;[00:15.80] Deuxième ligne"></textarea>
+    <button id="use" class="sec">Utiliser ces paroles</button>
+  </details>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const ST={"Poppins":"Poppins,sans-serif","Bebas Neue":"'Bebas Neue',Impact,sans-serif","Pacifico":"Pacifico,cursive","Roboto Mono":"'Roboto Mono',monospace","Georgia":"Georgia,serif","Système":"system-ui,sans-serif"};
+const AS={left:"flex-start",center:"center",right:"flex-end"};
+const C=[
+["Couleur du texte","cText","color","#ffffff"],
+["Couleur de la ligne active","cAct","color","#ffd84d"],
+["Couleur du fond","cBg","color","#000000"],
+["Opacité du fond","oBg","range",0.5,0,1,0.05],
+["Opacité du texte","oTxt","range",1,0.1,1,0.05],
+["Police","font","select","Poppins",Object.keys(ST).map(k=>[k,k])],
+["Taille du texte (px)","fs","range",40,16,120,1],
+["Largeur max (%)","w","range",80,20,100,1],
+["Hauteur max (px)","h","range",320,80,800,10],
+["Lignes avant","bef","range",1,0,4,1],
+["Lignes après","aft","range",1,0,4,1],
+["Animation","anim","select","fade",[["none","Aucune"],["fade","Fondu"],["slide","Glissement"],["zoom","Zoom"],["kar","Karaoké"]]],
+["Durée de l’animation (ms)","ad","range",400,100,1500,50],
+["Alignement","al","select","center",[["left","Gauche"],["center","Centre"],["right","Droite"]]],
+["Contour et ombre","sh","check",true],
+["Décalage de synchro (s)","off","range",0,-10,10,0.1]
+];
+const DEMO=[{t:0,s:"Ligne précédente"},{t:3,s:"Voici la ligne en cours"},{t:6,s:"Et la ligne suivante"}];
+let S={};C.forEach(c=>S[c[1]]=c[3]);
+try{Object.assign(S,JSON.parse(localStorage.getItem("lyr")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("lyr",JSON.stringify(S))}catch(e){}};
+
+$("#set").innerHTML=C.map(c=>{const k=c[1],t=c[2];let i;
+  if(t==="select")i=`<select data-k="${k}">${c[4].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select>`;
+  else if(t==="range")i=`<input type="range" data-k="${k}" min="${c[4]}" max="${c[5]}" step="${c[6]}">`;
+  else if(t==="check")i=`<input type="checkbox" data-k="${k}">`;
+  else i=`<input type="color" data-k="${k}">`;
+  return `<label><span>${c[0]} <b data-v="${k}"></b></span>${i}</label>`}).join("");
+
+$("#set").addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;
+  const t=e.target.type;S[k]=t==="checkbox"?e.target.checked:t==="range"?+e.target.value:e.target.value;save();apply()});
+
+function rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`}
+function apply(){const s=$("#lyr").style,p=(k,v)=>s.setProperty(k,v);
+  p("--w",S.w+"%");p("--h",S.h+"px");p("--fs",S.fs+"px");p("--ff",ST[S.font]||ST.Poppins);p("--al",S.al);p("--as",AS[S.al]);
+  p("--bgc",rgba(S.cBg,S.oBg));p("--ct",S.cText);p("--ca",S.cAct);p("--ot",S.oTxt);p("--ad",S.ad+"ms");
+  p("--sh",S.sh?"0 0 8px #000,0 2px 4px #000":"none");
+  document.querySelectorAll("[data-k]").forEach(e=>{const k=e.dataset.k;
+    if(e.type==="checkbox")e.checked=S[k];else e.value=S[k];
+    const v=document.querySelector(`[data-v="${k}"]`);if(v&&e.type==="range")v.textContent=S[k]});
+  render()}
+
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let P=null,apiReady=false,pr=false,vid=null,created=null,autoFor=null,lines=[],idx=-2;
+
+function render(){const demo=!lines.length,L=demo?DEMO:lines,i=demo?1:idx;
+  const a=Math.max(0,i-S.bef),b=Math.min(L.length-1,i+S.aft);let h="";
+  for(let k=a;k<=b;k++){const c=k===i;
+    const kd=c?Math.min(12,Math.max(.5,((L[k+1]?L[k+1].t:L[k].t+4)-L[k].t)*.9)):0;
+    h+=`<div class="line${c?" cur "+S.anim:""}"${c?` style="--kd:${kd}s"`:""}>${esc(L[k].s)}</div>`}
+  $("#lyr").innerHTML=h}
+
+function parseLRC(s){const out=[];
+  for(const l of s.split(/\r?\n/)){const m=[...l.matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g)];if(!m.length)continue;
+    const txt=l.replace(/\[[^\]]*\]/g,"").trim()||"♪";
+    for(const x of m)out.push({t:+x[1]*60+parseFloat(x[2].replace(":",".")),s:txt})}
+  return out.sort((a,b)=>a.t-b.t)}
+
+function tick(force){if(!lines.length)return;
+  const t=(P&&P.getCurrentTime?P.getCurrentTime():0)+S.off;let i=-1;
+  for(let k=0;k<lines.length;k++){if(lines[k].t<=t)i=k;else break}
+  if(i!==idx||force){idx=i;render()}}
+setInterval(tick,100);
+
+const setMsg=t=>$("#msg").textContent=t;
+function ytId(u){u=u.trim();const m=u.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([\w-]{11})/);return m?m[1]:(/^[\w-]{11}$/.test(u)?u:null)}
+
+window.onYouTubeIframeAPIReady=()=>{apiReady=true;boot()};
+const sc=document.createElement("script");sc.src="https://www.youtube.com/iframe_api";document.head.appendChild(sc);
+function boot(){if(!apiReady||!vid)return;
+  if(!P){created=vid;
+    P=new YT.Player("yt",{videoId:vid,playerVars:{playsinline:1,rel:0},events:{
+      onReady:e=>{pr=true;if(vid!==created)P.loadVideoById(vid);else e.target.playVideo()},
+      onStateChange:onState}})}
+  else if(pr)P.loadVideoById(vid)}
+
+function guess(t,a){
+  const s=t.replace(/[\(\[][^\)\]]*(official|video|audio|lyric|clip|visuali|remaster|live|hd|4k|mv|paroles)[^\)\]]*[\)\]]/gi,"")
+    .replace(/\s[-|]\s*(official|lyrics?|audio|video).*$/i,"").replace(/\s+(ft|feat)\.?\s.*$/i,"").replace(/\s+/g," ").trim();
+  const p=s.split(/\s[-–|]\s/);
+  if(p.length>=2)return{ar:p[0].trim(),ti:p.slice(1).join(" ").trim()};
+  return{ar:(a||"").replace(/\s*-\s*topic$/i,"").replace(/vevo$/i,"").trim(),ti:s}}
+
+function onState(e){if(e.data===1&&autoFor!==vid){autoFor=vid;
+  const d=P.getVideoData(),g=guess(d.title||"",d.author);
+  $("#ar").value=g.ar;$("#ti").value=g.ti;search()}}
+
+async function search(){
+  const ti=$("#ti").value.trim(),ar=$("#ar").value.trim(),enc=encodeURIComponent;
+  if(!ti)return setMsg("Entre un titre, puis appuie sur Chercher.");
+  setMsg("Recherche des paroles…");lines=[];idx=-2;render();
+  const dur=P&&P.getDuration?P.getDuration():0;
+  const tries=[`track_name=${enc(ti)}&artist_name=${enc(ar)}`,`q=${enc(ar+" "+ti)}`,`q=${enc(ti)}`];
+  try{
+    for(const q of tries){
+      const r=await fetch("https://lrclib.net/api/search?"+q);if(!r.ok)continue;
+      const j=(await r.json()).filter(x=>x.syncedLyrics);if(!j.length)continue;
+      if(dur>0)j.sort((a,b)=>Math.abs(a.duration-dur)-Math.abs(b.duration-dur));
+      lines=parseLRC(j[0].syncedLyrics);idx=-2;
+      setMsg(`Paroles trouvées : ${j[0].trackName} – ${j[0].artistName}`);tick(true);return}
+    setMsg("Aucune parole synchronisée trouvée. Corrige l’artiste ou le titre, ou colle un fichier .lrc plus bas.")
+  }catch(e){setMsg("Impossible de joindre LRCLIB. Vérifie la connexion.")}}
+
+$("#go").onclick=()=>{const id=ytId($("#url").value);
+  if(!id)return setMsg("Lien YouTube non reconnu.");
+  vid=id;autoFor=null;lines=[];idx=-2;render();setMsg("Chargement de la vidéo… appuie sur lecture si elle ne démarre pas.");boot()};
+$("#url").addEventListener("keydown",e=>{if(e.key==="Enter")$("#go").click()});
+$("#se").onclick=search;
+$("#use").onclick=()=>{const l=parseLRC($("#lrc").value);
+  if(!l.length)return setMsg("Aucune ligne reconnue. Format attendu : [mm:ss.xx] texte");
+  lines=l;idx=-2;setMsg("Paroles personnalisées chargées.");tick(true)};
+$("#rst").onclick=()=>{C.forEach(c=>S[c[1]]=c[3]);save();apply()};
+$("#cl").onclick=()=>document.body.classList.add("clean");
+$("#back").onclick=()=>document.body.classList.remove("clean");
+
+apply();
+</script>
+</body>
+</html>
