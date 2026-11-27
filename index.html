@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Paroles VR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Pacifico&family=Poppins:wght@600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Pacifico&family=Poppins:wght@500&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#101218;--card:#1b1e27;--ln:#2c3140;--fg:#eef1f6;--mut:#9099ab;--acc:#8fb0ff;color-scheme:dark}
 *{box-sizing:border-box}
@@ -18,18 +18,28 @@ button.sec{background:var(--card);color:var(--fg);border:1px solid var(--ln)}
 .vid{aspect-ratio:16/9;max-width:640px;margin:12px auto 0;background:#000;border-radius:12px;overflow:hidden}
 .vid iframe{width:100%;height:100%;border:0}
 #msg{color:var(--mut);font-size:15px;margin:10px 0;min-height:1.4em}
-.stage{min-height:220px;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:12px;background:repeating-conic-gradient(#171a21 0 25%,#0c0d11 0 50%) 0 0/28px 28px}
-#lyr{width:var(--w);max-height:var(--h);overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:.35em;padding:.6em 1em;border-radius:16px;font-size:var(--fs);font-family:var(--ff);text-align:var(--al);background:var(--bgc)}
-.line{width:fit-content;max-width:100%;align-self:var(--as);color:var(--ct);opacity:calc(var(--ot)*.4);text-shadow:var(--sh);line-height:1.25;overflow-wrap:anywhere}
-.line.cur{color:var(--ca);opacity:var(--ot)}
+.stage{height:calc(var(--h,300px) + 28px);min-height:160px;border-radius:14px;display:flex;justify-content:center;align-items:center;padding:14px;background:repeating-conic-gradient(#171a21 0 25%,#0c0d11 0 50%) 0 0/28px 28px}
+.stage[data-m=b]{align-items:flex-end}
+#lyr{width:var(--w);max-height:100%;overflow:hidden;padding:.5em .7em;border-radius:18px;font-size:calc(var(--fs)*var(--k,1));font-family:var(--ff);background:var(--bgc)}
+#in{display:flex;flex-direction:column;gap:.4em;text-align:var(--al)}
+.line{width:fit-content;max-width:100%;align-self:var(--as);line-height:1.3;font-weight:500;overflow-wrap:anywhere}
+.txt .line{color:var(--ct);text-shadow:var(--sh)}
+.txt .line.cur{color:var(--ca)}
+.bub{background:var(--cb);color:var(--ct);padding:.5em .85em;border-radius:1.1em;max-width:min(100%,22em);box-shadow:0 2px 10px rgba(0,0,0,.25)}
+#lyr[data-al=left] .bub.cur{border-bottom-left-radius:.3em}
+#lyr:not([data-al=left]) .bub.cur{border-bottom-right-radius:.3em}
 .cur.fade{animation:fade var(--ad) ease both}
-.cur.slide{animation:slide var(--ad) ease-out both}
+.cur.slide{animation:slide var(--ad) cubic-bezier(.2,.9,.3,1) both}
 .cur.zoom{animation:zoom var(--ad) cubic-bezier(.2,1.4,.4,1) both}
-.cur.kar{color:transparent;text-shadow:none;background:linear-gradient(90deg,var(--ca) 50%,var(--ct) 50%) 100% 0/200% 100%;-webkit-background-clip:text;background-clip:text;animation:kar var(--kd) linear forwards}
 @keyframes fade{from{opacity:0}}
-@keyframes slide{from{transform:translateY(45%);opacity:0}}
-@keyframes zoom{from{transform:scale(.6);opacity:0}}
-@keyframes kar{to{background-position:0 0}}
+@keyframes slide{from{transform:translateY(60%);opacity:0}}
+@keyframes zoom{from{transform:scale(.7);opacity:0}}
+.ch{animation:show .01s both}
+@keyframes show{from{opacity:0}}
+.dots{display:flex;gap:.3em;padding:.75em .9em;animation:fade .3s ease both}
+.dots i{width:.5em;height:.5em;border-radius:50%;background:var(--ct);animation:bob 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,60%,100%{transform:none}30%{transform:translateY(-.3em)}}
 summary{cursor:pointer;padding:14px 0;font-weight:600}
 .set{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin:6px 0 16px}
 label span{display:block;color:var(--mut);font-size:15px;margin-bottom:6px}
@@ -39,11 +49,11 @@ label b{color:var(--fg)}
 .set input[type=checkbox]{width:32px;height:32px;accent-color:var(--acc)}
 .set select{width:100%}
 textarea{width:100%;height:160px;margin-bottom:8px}
-#back{display:none;position:fixed;right:12px;top:12px}
+#back{display:none;position:fixed;right:12px;top:12px;z-index:5}
 .clean .tools{display:none}
 .clean .vid{max-width:340px}
 .clean #back{display:block}
-@media (prefers-reduced-motion:reduce){.cur{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.cur,.ch{animation:none!important}}
 </style>
 </head>
 <body>
@@ -56,7 +66,7 @@ textarea{width:100%;height:160px;margin-bottom:8px}
   <div class="bar"><input id="ar" type="text" placeholder="Artiste"><input id="ti" type="text" placeholder="Titre"><button id="se" class="sec">Chercher les paroles</button></div>
 </div>
 <p id="msg">Colle un lien YouTube et appuie sur Lancer. L’aperçu ci-dessous suit tes réglages.</p>
-<div class="stage"><div id="lyr"></div></div>
+<div class="stage"><div id="lyr"><div id="in"></div></div></div>
 <div class="tools">
   <details open><summary>Réglages d’affichage</summary>
     <div id="set" class="set"></div>
@@ -70,30 +80,36 @@ textarea{width:100%;height:160px;margin-bottom:8px}
 
 <script>
 const $=s=>document.querySelector(s);
-const ST={"Poppins":"Poppins,sans-serif","Bebas Neue":"'Bebas Neue',Impact,sans-serif","Pacifico":"Pacifico,cursive","Roboto Mono":"'Roboto Mono',monospace","Georgia":"Georgia,serif","Système":"system-ui,sans-serif"};
+const ST={"Système":"system-ui,-apple-system,sans-serif","Poppins":"Poppins,sans-serif","Bebas Neue":"'Bebas Neue',Impact,sans-serif","Pacifico":"Pacifico,cursive","Roboto Mono":"'Roboto Mono',monospace","Georgia":"Georgia,serif"};
 const AS={left:"flex-start",center:"center",right:"flex-end"};
 const C=[
+["Style","mode","select","bulle",[["bulle","Texto (bulles de message)"],["texte","Texte simple"]]],
+["Couleur de la bulle","cBub","color","#2f7bff"],
 ["Couleur du texte","cText","color","#ffffff"],
-["Couleur de la ligne active","cAct","color","#ffd84d"],
+["Couleur ligne active (texte simple)","cAct","color","#ffe58a"],
 ["Couleur du fond","cBg","color","#000000"],
-["Opacité du fond","oBg","range",0.5,0,1,0.05],
-["Opacité du texte","oTxt","range",1,0.1,1,0.05],
-["Police","font","select","Poppins",Object.keys(ST).map(k=>[k,k])],
-["Taille du texte (px)","fs","range",40,16,120,1],
-["Largeur max (%)","w","range",80,20,100,1],
-["Hauteur max (px)","h","range",320,80,800,10],
-["Lignes avant","bef","range",1,0,4,1],
-["Lignes après","aft","range",1,0,4,1],
-["Animation","anim","select","fade",[["none","Aucune"],["fade","Fondu"],["slide","Glissement"],["zoom","Zoom"],["kar","Karaoké"]]],
-["Durée de l’animation (ms)","ad","range",400,100,1500,50],
+["Opacité du fond","oBg","range",0.25,0,1,0.05],
+["Opacité générale","oTxt","range",1,0.1,1,0.05],
+["Police","font","select","Système",Object.keys(ST).map(k=>[k,k])],
+["Taille du texte (px)","fs","range",28,14,90,1],
+["Largeur max (%)","w","range",70,20,100,1],
+["Hauteur max (px)","h","range",300,100,800,10],
+["Messages précédents","bef","range",2,0,5,1],
+["Messages suivants","aft","range",0,0,4,1],
+["Animation d’apparition","anim","select","slide",[["none","Aucune"],["fade","Fondu"],["slide","Glissement"],["zoom","Zoom"]]],
+["Durée de l’animation (ms)","ad","range",350,100,1500,50],
+["Écriture progressive","type","check",true],
+["Vitesse d’écriture (ms par lettre)","ts","range",40,10,120,5],
+["Bulle de saisie (…)","dots","check",true],
 ["Alignement","al","select","center",[["left","Gauche"],["center","Centre"],["right","Droite"]]],
-["Contour et ombre","sh","check",true],
+["Ombre du texte (texte simple)","sh","check",true],
+["Réduire auto si ça dépasse","fit","check",true],
 ["Décalage de synchro (s)","off","range",0,-10,10,0.1]
 ];
-const DEMO=[{t:0,s:"Ligne précédente"},{t:3,s:"Voici la ligne en cours"},{t:6,s:"Et la ligne suivante"}];
+const DEMO=[{t:0,s:"Voici un aperçu de tes paroles"},{t:3.5,s:"Elles s’écrivent au fur et à mesure"},{t:7,s:"Et changent de bulle à chaque ligne"}];
 let S={};C.forEach(c=>S[c[1]]=c[3]);
-try{Object.assign(S,JSON.parse(localStorage.getItem("lyr")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("lyr",JSON.stringify(S))}catch(e){}};
+try{Object.assign(S,JSON.parse(localStorage.getItem("lyr2")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("lyr2",JSON.stringify(S))}catch(e){}};
 
 $("#set").innerHTML=C.map(c=>{const k=c[1],t=c[2];let i;
   if(t==="select")i=`<select data-k="${k}">${c[4].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select>`;
@@ -106,24 +122,32 @@ $("#set").addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;
   const t=e.target.type;S[k]=t==="checkbox"?e.target.checked:t==="range"?+e.target.value:e.target.value;save();apply()});
 
 function rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`}
-function apply(){const s=$("#lyr").style,p=(k,v)=>s.setProperty(k,v);
-  p("--w",S.w+"%");p("--h",S.h+"px");p("--fs",S.fs+"px");p("--ff",ST[S.font]||ST.Poppins);p("--al",S.al);p("--as",AS[S.al]);
-  p("--bgc",rgba(S.cBg,S.oBg));p("--ct",S.cText);p("--ca",S.cAct);p("--ot",S.oTxt);p("--ad",S.ad+"ms");
-  p("--sh",S.sh?"0 0 8px #000,0 2px 4px #000":"none");
+function apply(){const st=$(".stage"),s=st.style,p=(k,v)=>s.setProperty(k,v),bub=S.mode==="bulle";
+  p("--w",S.w+"%");p("--h",S.h+"px");p("--fs",S.fs+"px");p("--ff",ST[S.font]||ST["Système"]);p("--al",S.al);p("--as",AS[S.al]);
+  p("--bgc",rgba(S.cBg,S.oBg));p("--cb",S.cBub);p("--ct",S.cText);p("--ca",S.cAct);p("--ad",S.ad+"ms");
+  p("--sh",!bub&&S.sh?"0 0 8px #000,0 2px 4px #000":"none");
+  st.dataset.m=bub?"b":"t";$("#lyr").dataset.al=S.al;$("#in").className=bub?"":"txt";
   document.querySelectorAll("[data-k]").forEach(e=>{const k=e.dataset.k;
     if(e.type==="checkbox")e.checked=S[k];else e.value=S[k];
     const v=document.querySelector(`[data-v="${k}"]`);if(v&&e.type==="range")v.textContent=S[k]});
   render()}
 
 const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-let P=null,apiReady=false,pr=false,vid=null,created=null,autoFor=null,lines=[],idx=-2;
+let P=null,apiReady=false,pr=false,vid=null,created=null,autoFor=null,lines=[],idx=-2,di=0;
 
-function render(){const demo=!lines.length,L=demo?DEMO:lines,i=demo?1:idx;
-  const a=Math.max(0,i-S.bef),b=Math.min(L.length-1,i+S.aft);let h="";
-  for(let k=a;k<=b;k++){const c=k===i;
-    const kd=c?Math.min(12,Math.max(.5,((L[k+1]?L[k+1].t:L[k].t+4)-L[k].t)*.9)):0;
-    h+=`<div class="line${c?" cur "+S.anim:""}"${c?` style="--kd:${kd}s"`:""}>${esc(L[k].s)}</div>`}
-  $("#lyr").innerHTML=h}
+function fit(){const b=$("#lyr");b.style.setProperty("--k",1);if(!S.fit)return;
+  let k=1;while(b.scrollHeight>b.clientHeight+1&&k>.35){k-=.05;b.style.setProperty("--k",k.toFixed(2))}}
+
+function render(){const demo=!lines.length,L=demo?DEMO:lines,i=demo?di:idx,bub=S.mode==="bulle";
+  const a=Math.max(0,i-S.bef),b=Math.min(L.length-1,i+S.aft);let h="",td=.3;
+  for(let k=a;k<=b;k++){const c=k===i,op=(Math.max(.25,1-Math.abs(k-i)*.28)*S.oTxt).toFixed(2);let inner=esc(L[k].s);
+    if(c&&S.type){const kd=Math.max(.6,(L[k+1]?L[k+1].t:L[k].t+4)-L[k].t),ch=[...L[k].s],
+      st=Math.min(S.ts/1000,kd*.7/Math.max(ch.length,1));
+      inner=ch.map((x,n)=>`<span class="ch" style="animation-delay:${(.12+n*st).toFixed(2)}s">${esc(x)}</span>`).join("");td=.12+ch.length*st}
+    h+=`<div class="line${bub?" bub":""}${c?" cur "+S.anim:""}" style="opacity:${op}">${inner}</div>`}
+  if(bub&&S.dots&&!S.aft&&i<L.length-1)h+=`<div class="line bub dots" style="opacity:${(.7*S.oTxt).toFixed(2)};animation-delay:${(td+.3).toFixed(2)}s"><i></i><i></i><i></i></div>`;
+  $("#in").innerHTML=h;fit()}
+setInterval(()=>{if(!lines.length){di=(di+1)%DEMO.length;render()}},3500);
 
 function parseLRC(s){const out=[];
   for(const l of s.split(/\r?\n/)){const m=[...l.matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g)];if(!m.length)continue;
