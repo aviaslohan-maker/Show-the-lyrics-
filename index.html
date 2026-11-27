@@ -5,29 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Paroles VR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Pacifico&family=Poppins:wght@500&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Pacifico&family=Pixelify+Sans:wght@500&family=Poppins:wght@500&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:"Minecraft";src:url("https://cdn.jsdelivr.net/npm/skinview3d@3.4.2/assets/minecraft.woff2") format("woff2");font-display:swap}
 :root{--bg:#101218;--card:#1b1e27;--ln:#2c3140;--fg:#eef1f6;--mut:#9099ab;--acc:#8fb0ff;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.4 system-ui,sans-serif;padding:16px;max-width:1100px;margin-inline:auto}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
 input[type=text],textarea,select{background:var(--card);color:var(--fg);border:1px solid var(--ln);border-radius:12px;padding:12px;font:inherit;min-width:0}
 .bar input{flex:1 1 200px}
 button{background:var(--acc);color:#0b1020;border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer}
 button.sec{background:var(--card);color:var(--fg);border:1px solid var(--ln)}
+#syn button{padding:10px 12px;font-size:15px}
+#offv{color:var(--mut);font-size:15px}
 .vid{aspect-ratio:16/9;max-width:640px;margin:12px auto 0;background:#000;border-radius:12px;overflow:hidden}
 .vid iframe{width:100%;height:100%;border:0}
 #msg{color:var(--mut);font-size:15px;margin:10px 0;min-height:1.4em}
 .stage{height:calc(var(--h,300px) + 28px);min-height:160px;border-radius:14px;display:flex;justify-content:center;align-items:center;padding:14px;background:repeating-conic-gradient(#171a21 0 25%,#0c0d11 0 50%) 0 0/28px 28px}
 .stage[data-m=b]{align-items:flex-end}
-#lyr{width:var(--w);max-height:100%;overflow:hidden;padding:.5em .7em;border-radius:18px;font-size:calc(var(--fs)*var(--k,1));font-family:var(--ff);background:var(--bgc)}
+#lyr{width:var(--w);max-height:min(100%,var(--h));overflow:hidden;padding:.5em .7em;border-radius:18px;font-size:calc(var(--fs)*var(--k,1));font-family:var(--ff);background:var(--bgc)}
 #in{display:flex;flex-direction:column;gap:.4em;text-align:var(--al)}
-.line{width:fit-content;max-width:100%;align-self:var(--as);line-height:1.3;font-weight:500;overflow-wrap:anywhere}
+.line,.mc{width:fit-content;max-width:100%;align-self:var(--as);line-height:1.3;font-weight:500;overflow-wrap:anywhere}
 .txt .line{color:var(--ct);text-shadow:var(--sh)}
 .txt .line.cur{color:var(--ca)}
-.bub{background:var(--cb);color:var(--ct);padding:.5em .85em;border-radius:1.1em;max-width:min(100%,22em);box-shadow:0 2px 10px rgba(0,0,0,.25)}
-#lyr[data-al=left] .bub.cur{border-bottom-left-radius:.3em}
-#lyr:not([data-al=left]) .bub.cur{border-bottom-right-radius:.3em}
+.bub{padding:.5em .85em;border-radius:1.1em;max-width:min(100%,22em);box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.bub.me{background:var(--cb);color:var(--ct);align-self:flex-end}
+.bub.them{background:var(--cr);color:var(--cr2);align-self:flex-start}
+.bub.cur.me{border-bottom-right-radius:.3em}
+.bub.cur.them,.bub.dots{border-bottom-left-radius:.3em}
+.mc{color:var(--ct);text-shadow:.1em .1em 0 #3f3f3f;line-height:1.25;-webkit-font-smoothing:none}
+.wd{display:inline-block;white-space:nowrap}
+.w{display:inline-block;animation:wave var(--wv,1.4s) ease-in-out infinite}
+@keyframes wave{0%,100%{transform:none}50%{transform:translateY(calc(var(--wa,.15)*-1em))}}
 .cur.fade{animation:fade var(--ad) ease both}
 .cur.slide{animation:slide var(--ad) cubic-bezier(.2,.9,.3,1) both}
 .cur.zoom{animation:zoom var(--ad) cubic-bezier(.2,1.4,.4,1) both}
@@ -37,7 +47,7 @@ button.sec{background:var(--card);color:var(--fg);border:1px solid var(--ln)}
 .ch{animation:show .01s both}
 @keyframes show{from{opacity:0}}
 .dots{display:flex;gap:.3em;padding:.75em .9em;animation:fade .3s ease both}
-.dots i{width:.5em;height:.5em;border-radius:50%;background:var(--ct);animation:bob 1s infinite}
+.dots i{width:.5em;height:.5em;border-radius:50%;background:currentColor;opacity:.55;animation:bob 1s infinite}
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes bob{0%,60%,100%{transform:none}30%{transform:translateY(-.3em)}}
 summary{cursor:pointer;padding:14px 0;font-weight:600}
@@ -49,28 +59,39 @@ label b{color:var(--fg)}
 .set input[type=checkbox]{width:32px;height:32px;accent-color:var(--acc)}
 .set select{width:100%}
 textarea{width:100%;height:160px;margin-bottom:8px}
-#back{display:none;position:fixed;right:12px;top:12px;z-index:5}
-.clean .tools{display:none}
+#fb{display:none;position:fixed;right:12px;top:12px;gap:8px;z-index:6;opacity:.55}
+#fb:hover,#fb:focus-within{opacity:1}
+.clean #fb,.full #fb{display:flex}
+.clean .tools,.full .tools,.clean #msg,.full #msg{display:none}
 .clean .vid{max-width:340px}
-.clean #back{display:block}
+.hidev .vid{position:fixed;left:-10000px;top:0;width:320px;margin:0}
+.full{overflow:hidden}
+.full .stage{position:fixed;inset:0;height:auto;border-radius:0;background:#000;z-index:4}
+.full .stage[data-m=b]{align-items:center}
+.full:not(.hidev) .vid{position:fixed;right:12px;bottom:12px;width:min(320px,40vw);margin:0;z-index:6}
 @media (prefers-reduced-motion:reduce){.cur,.ch{animation:none!important}}
 </style>
 </head>
 <body>
-<button id="back" class="sec">Réglages</button>
+<div id="fb"><button id="tv" class="sec">Vidéo</button><button id="ex" class="sec">Quitter</button></div>
 <div class="tools">
   <div class="bar" style="margin-top:0"><input id="url" type="text" inputmode="url" placeholder="Colle un lien YouTube"><button id="go">Lancer</button></div>
 </div>
 <div class="vid"><div id="yt"></div></div>
 <div class="tools">
   <div class="bar"><input id="ar" type="text" placeholder="Artiste"><input id="ti" type="text" placeholder="Titre"><button id="se" class="sec">Chercher les paroles</button></div>
+  <div class="bar" id="syn">
+    <button class="sec" data-o="-0.5">Retarder 0,5 s</button><button class="sec" data-o="-0.1">Retarder 0,1 s</button>
+    <button class="sec" data-o="0.1">Avancer 0,1 s</button><button class="sec" data-o="0.5">Avancer 0,5 s</button>
+    <button id="cal">Calibrer</button><button id="alt" class="sec">Autre version</button><span id="offv"></span>
+  </div>
 </div>
 <p id="msg">Colle un lien YouTube et appuie sur Lancer. L’aperçu ci-dessous suit tes réglages.</p>
 <div class="stage"><div id="lyr"><div id="in"></div></div></div>
 <div class="tools">
   <details open><summary>Réglages d’affichage</summary>
     <div id="set" class="set"></div>
-    <button id="rst" class="sec">Réinitialiser</button> <button id="cl">Mode épuré</button>
+    <button id="rst" class="sec">Réinitialiser</button> <button id="cl">Mode épuré</button> <button id="fs2">Plein écran</button>
   </details>
   <details><summary>Coller mes propres paroles (.lrc)</summary>
     <textarea id="lrc" placeholder="[00:12.30] Première ligne&#10;[00:15.80] Deuxième ligne"></textarea>
@@ -79,75 +100,116 @@ textarea{width:100%;height:160px;margin-bottom:8px}
 </div>
 
 <script>
-const $=s=>document.querySelector(s);
+const $=s=>document.querySelector(s),B=document.body;
 const ST={"Système":"system-ui,-apple-system,sans-serif","Poppins":"Poppins,sans-serif","Bebas Neue":"'Bebas Neue',Impact,sans-serif","Pacifico":"Pacifico,cursive","Roboto Mono":"'Roboto Mono',monospace","Georgia":"Georgia,serif"};
+const MCF="Minecraft,'Pixelify Sans',monospace";
 const AS={left:"flex-start",center:"center",right:"flex-end"};
+/* modes : b = texto, t = texte simple, m = Minecraft. Le dernier élément de chaque ligne = modes où le réglage est visible */
 const C=[
-["Style","mode","select","bulle",[["bulle","Texto (bulles de message)"],["texte","Texte simple"]]],
-["Couleur de la bulle","cBub","color","#2f7bff"],
-["Couleur du texte","cText","color","#ffffff"],
-["Couleur ligne active (texte simple)","cAct","color","#ffe58a"],
-["Couleur du fond","cBg","color","#000000"],
-["Opacité du fond","oBg","range",0.25,0,1,0.05],
-["Opacité générale","oTxt","range",1,0.1,1,0.05],
-["Police","font","select","Système",Object.keys(ST).map(k=>[k,k])],
-["Taille du texte (px)","fs","range",28,14,90,1],
-["Largeur max (%)","w","range",70,20,100,1],
-["Hauteur max (px)","h","range",300,100,800,10],
-["Messages précédents","bef","range",2,0,5,1],
-["Messages suivants","aft","range",0,0,4,1],
-["Animation d’apparition","anim","select","slide",[["none","Aucune"],["fade","Fondu"],["slide","Glissement"],["zoom","Zoom"]]],
-["Durée de l’animation (ms)","ad","range",350,100,1500,50],
-["Écriture progressive","type","check",true],
-["Vitesse d’écriture (ms par lettre)","ts","range",40,10,120,5],
-["Bulle de saisie (…)","dots","check",true],
-["Alignement","al","select","center",[["left","Gauche"],["center","Centre"],["right","Droite"]]],
-["Ombre du texte (texte simple)","sh","check",true],
-["Réduire auto si ça dépasse","fit","check",true],
-["Décalage de synchro (s)","off","range",0,-10,10,0.1]
+["Style","mode","select","bulle",[["bulle","Texto (bulles de message)"],["texte","Texte simple"],["mc","Minecraft"]],"btm"],
+["Chance que le message soit de moi (%)","pct","range",50,0,100,5,"b"],
+["Couleur de mes messages","cBub","color","#2f7bff","b"],
+["Couleur des messages reçus","cRecv","color","#e5e5ea","b"],
+["Texte des messages reçus","cRT","color","#1c1c1e","b"],
+["Bulle de saisie (…)","dots","check",true,"b"],
+["Couleur ligne active","cAct","color","#ffe58a","t"],
+["Ombre du texte","sh","check",true,"t"],
+["Mots par morceau","cw","range",3,1,8,1,"m"],
+["Amplitude de la vague","wa","range",0.15,0,0.5,0.01,"m"],
+["Durée de la vague (s)","wv","range",1.4,0.5,3,0.1,"m"],
+["Couleur du texte","cText","color","#ffffff","btm"],
+["Police","font","select","Système",Object.keys(ST).map(k=>[k,k]),"bt"],
+["Taille du texte (px)","fs","range",28,14,90,1,"btm"],
+["Largeur max (%)","w","range",70,20,100,1,"btm"],
+["Hauteur max (px)","h","range",300,100,800,10,"btm"],
+["Couleur du fond","cBg","color","#000000","btm"],
+["Opacité du fond","oBg","range",0.25,0,1,0.05,"btm"],
+["Opacité générale","oTxt","range",1,0.1,1,0.05,"btm"],
+["Messages précédents","bef","range",2,0,5,1,"bt"],
+["Messages suivants","aft","range",0,0,4,1,"bt"],
+["Alignement","al","select","center",[["left","Gauche"],["center","Centre"],["right","Droite"]],"tm"],
+["Animation d’apparition","anim","select","slide",[["none","Aucune"],["fade","Fondu"],["slide","Glissement"],["zoom","Zoom"]],"btm"],
+["Durée de l’animation (ms)","ad","range",350,100,1500,50,"btm"],
+["Écriture progressive","type","check",true,"bt"],
+["Vitesse d’écriture automatique","tsA","check",true,"bt"],
+["Vitesse d’écriture (ms par lettre)","ts","range",40,10,120,5,"bt"],
+["Réduire auto si ça dépasse","fit","check",true,"btm"],
+["Décalage de synchro (s)","off","range",0,-30,30,0.1,"btm"]
 ];
 const DEMO=[{t:0,s:"Voici un aperçu de tes paroles"},{t:3.5,s:"Elles s’écrivent au fur et à mesure"},{t:7,s:"Et changent de bulle à chaque ligne"}];
 let S={};C.forEach(c=>S[c[1]]=c[3]);
 try{Object.assign(S,JSON.parse(localStorage.getItem("lyr2")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("lyr2",JSON.stringify(S))}catch(e){}};
+S.off=0;
+let OFFS={};try{OFFS=JSON.parse(localStorage.getItem("lyroff")||"{}")}catch(e){}
+const save=()=>{try{const o={...S};delete o.off;localStorage.setItem("lyr2",JSON.stringify(o))}catch(e){}};
 
-$("#set").innerHTML=C.map(c=>{const k=c[1],t=c[2];let i;
+$("#set").innerHTML=C.map(c=>{const k=c[1],t=c[2],mo=c[c.length-1];let i;
   if(t==="select")i=`<select data-k="${k}">${c[4].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select>`;
   else if(t==="range")i=`<input type="range" data-k="${k}" min="${c[4]}" max="${c[5]}" step="${c[6]}">`;
   else if(t==="check")i=`<input type="checkbox" data-k="${k}">`;
   else i=`<input type="color" data-k="${k}">`;
-  return `<label><span>${c[0]} <b data-v="${k}"></b></span>${i}</label>`}).join("");
+  return `<label data-m="${mo}"><span>${c[0]} <b data-v="${k}"></b></span>${i}</label>`}).join("");
 
 $("#set").addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;
-  const t=e.target.type;S[k]=t==="checkbox"?e.target.checked:t==="range"?+e.target.value:e.target.value;save();apply()});
+  const t=e.target.type,v=t==="checkbox"?e.target.checked:t==="range"?+e.target.value:e.target.value;
+  if(k==="off")return setOff(v);S[k]=v;save();apply()});
+
+function setOff(v){S.off=Math.round(Math.max(-30,Math.min(30,v))*10)/10;
+  if(vid){OFFS[vid]=S.off;try{localStorage.setItem("lyroff",JSON.stringify(OFFS))}catch(e){}}
+  apply();tick(true)}
 
 function rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`}
-function apply(){const st=$(".stage"),s=st.style,p=(k,v)=>s.setProperty(k,v),bub=S.mode==="bulle";
-  p("--w",S.w+"%");p("--h",S.h+"px");p("--fs",S.fs+"px");p("--ff",ST[S.font]||ST["Système"]);p("--al",S.al);p("--as",AS[S.al]);
-  p("--bgc",rgba(S.cBg,S.oBg));p("--cb",S.cBub);p("--ct",S.cText);p("--ca",S.cAct);p("--ad",S.ad+"ms");
-  p("--sh",!bub&&S.sh?"0 0 8px #000,0 2px 4px #000":"none");
-  st.dataset.m=bub?"b":"t";$("#lyr").dataset.al=S.al;$("#in").className=bub?"":"txt";
+function apply(){const st=$(".stage"),s=st.style,p=(k,v)=>s.setProperty(k,v),M={bulle:"b",texte:"t",mc:"m"}[S.mode]||"b";
+  p("--w",S.w+"%");p("--h",S.h+"px");p("--fs",S.fs+"px");p("--ff",M==="m"?MCF:(ST[S.font]||ST["Système"]));p("--al",S.al);p("--as",AS[S.al]);
+  p("--bgc",rgba(S.cBg,S.oBg));p("--cb",S.cBub);p("--cr",S.cRecv);p("--cr2",S.cRT);p("--ct",S.cText);p("--ca",S.cAct);
+  p("--ad",S.ad+"ms");p("--wa",S.wa);p("--wv",S.wv+"s");
+  p("--sh",M==="t"&&S.sh?"0 0 8px #000,0 2px 4px #000":"none");
+  st.dataset.m=M;$("#lyr").dataset.al=S.al;$("#in").className=M==="t"?"txt":"";
   document.querySelectorAll("[data-k]").forEach(e=>{const k=e.dataset.k;
     if(e.type==="checkbox")e.checked=S[k];else e.value=S[k];
     const v=document.querySelector(`[data-v="${k}"]`);if(v&&e.type==="range")v.textContent=S[k]});
-  render()}
+  document.querySelectorAll("#set label").forEach(l=>l.hidden=!l.dataset.m.includes(M));
+  if(S.tsA)$("[data-k=ts]").closest("label").hidden=true;
+  $("#offv").textContent="Décalage : "+(S.off>0?"+":"")+S.off+" s";
+  dc=0;render()}
 
 const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-let P=null,apiReady=false,pr=false,vid=null,created=null,autoFor=null,lines=[],idx=-2,di=0;
+let P=null,apiReady=false,pr=false,vid=null,created=null,autoFor=null,lines=[],idx=-2,cidx=0,ck="",di=0,dc=0,dm=0,seed=7,cands=[],ci=0,calib=null;
+const reset=()=>{idx=-2;ck="";cidx=0};
+const rnd=k=>{const x=Math.sin((k+1)*12.9898+seed*78.233)*43758.5453;return x-Math.floor(x)};
+const isMe=k=>rnd(k)*100<S.pct;
+const durOf=(L,k)=>Math.max(.6,(L[k+1]?L[k+1].t:L[k].t+4)-L[k].t);
+
+function chunksOf(s,kd){const w=s.split(/\s+/).filter(Boolean),n=Math.max(1,S.cw),g=[];
+  for(let k=0;k<w.length;k+=n)g.push(w.slice(k,k+n).join(" "));
+  if(!g.length)g.push(s);
+  const tot=g.reduce((a,x)=>a+x.length,0)||1;let acc=0;
+  return g.map(x=>{const o={s:x,at:acc/tot*kd*.92};acc+=x.length;return o})}
+
+function wave(s){let n=0;
+  return s.split(" ").map(w=>`<span class="wd">${[...w].map(x=>`<span class="w" style="animation-delay:-${(n++*.1).toFixed(2)}s">${esc(x)}</span>`).join("")}</span>`).join(" ")}
 
 function fit(){const b=$("#lyr");b.style.setProperty("--k",1);if(!S.fit)return;
   let k=1;while(b.scrollHeight>b.clientHeight+1&&k>.35){k-=.05;b.style.setProperty("--k",k.toFixed(2))}}
 
-function render(){const demo=!lines.length,L=demo?DEMO:lines,i=demo?di:idx,bub=S.mode==="bulle";
-  const a=Math.max(0,i-S.bef),b=Math.min(L.length-1,i+S.aft);let h="",td=.3;
-  for(let k=a;k<=b;k++){const c=k===i,op=(Math.max(.25,1-Math.abs(k-i)*.28)*S.oTxt).toFixed(2);let inner=esc(L[k].s);
-    if(c&&S.type){const kd=Math.max(.6,(L[k+1]?L[k+1].t:L[k].t+4)-L[k].t),ch=[...L[k].s],
-      st=Math.min(S.ts/1000,kd*.7/Math.max(ch.length,1));
-      inner=ch.map((x,n)=>`<span class="ch" style="animation-delay:${(.12+n*st).toFixed(2)}s">${esc(x)}</span>`).join("");td=.12+ch.length*st}
-    h+=`<div class="line${bub?" bub":""}${c?" cur "+S.anim:""}" style="opacity:${op}">${inner}</div>`}
-  if(bub&&S.dots&&!S.aft&&i<L.length-1)h+=`<div class="line bub dots" style="opacity:${(.7*S.oTxt).toFixed(2)};animation-delay:${(td+.3).toFixed(2)}s"><i></i><i></i><i></i></div>`;
+function render(){const demo=!lines.length,L=demo?DEMO:lines,i=demo?di:idx;let h="";
+  if(S.mode==="mc"){
+    if(i>=0&&L[i]){const ch=chunksOf(L[i].s,durOf(L,i)),c=Math.min(demo?dc:cidx,ch.length-1);
+      h=`<div class="mc cur ${S.anim}" style="opacity:${S.oTxt}">${wave(ch[c].s)}</div>`}
+  }else{
+    const bub=S.mode==="bulle",a=Math.max(0,i-S.bef),b=Math.min(L.length-1,i+S.aft);let td=.3;
+    for(let k=a;k<=b;k++){const c=k===i,op=(Math.max(.25,1-Math.abs(k-i)*.28)*S.oTxt).toFixed(2);let inner=esc(L[k].s);
+      if(c&&S.type){const kd=durOf(L,k),ch=[...L[k].s],n=Math.max(ch.length,1);
+        const st=S.tsA?Math.min(.09,Math.max(.015,Math.min(3.5,kd*.55)/n)):Math.min(S.ts/1000,kd*.7/n);
+        inner=ch.map((x,j)=>`<span class="ch" style="animation-delay:${(.12+j*st).toFixed(2)}s">${esc(x)}</span>`).join("");td=.12+n*st}
+      h+=`<div class="line${bub?" bub "+(isMe(k)?"me":"them"):""}${c?" cur "+S.anim:""}" style="opacity:${op}">${inner}</div>`}
+    if(bub&&S.dots&&!S.aft&&i<L.length-1&&!isMe(i+1))h+=`<div class="line bub them dots" style="opacity:${(.8*S.oTxt).toFixed(2)};animation-delay:${(td+.3).toFixed(2)}s"><i></i><i></i><i></i></div>`}
   $("#in").innerHTML=h;fit()}
-setInterval(()=>{if(!lines.length){di=(di+1)%DEMO.length;render()}},3500);
+
+setInterval(()=>{if(lines.length)return;
+  if(S.mode==="mc"){dc++;if(dc>=chunksOf(DEMO[di].s,3.5).length){dc=0;di=(di+1)%DEMO.length}}
+  else{if(++dm<3)return;dm=0;di=(di+1)%DEMO.length;dc=0}
+  render()},1200);
 
 function parseLRC(s){const out=[];
   for(const l of s.split(/\r?\n/)){const m=[...l.matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g)];if(!m.length)continue;
@@ -158,7 +220,10 @@ function parseLRC(s){const out=[];
 function tick(force){if(!lines.length)return;
   const t=(P&&P.getCurrentTime?P.getCurrentTime():0)+S.off;let i=-1;
   for(let k=0;k<lines.length;k++){if(lines[k].t<=t)i=k;else break}
-  if(i!==idx||force){idx=i;render()}}
+  let c=0;
+  if(S.mode==="mc"&&i>=0){const ch=chunksOf(lines[i].s,durOf(lines,i));for(let n=0;n<ch.length;n++)if(ch[n].at<=t-lines[i].t)c=n}
+  const key=i+":"+c;
+  if(key!==ck||force){ck=key;idx=i;cidx=c;render()}}
 setInterval(tick,100);
 
 const setMsg=t=>$("#msg").textContent=t;
@@ -184,10 +249,16 @@ function onState(e){if(e.data===1&&autoFor!==vid){autoFor=vid;
   const d=P.getVideoData(),g=guess(d.title||"",d.author);
   $("#ar").value=g.ar;$("#ti").value=g.ti;search()}}
 
+function useCand(n){ci=(n+cands.length)%cands.length;const c=cands[ci],dur=P&&P.getDuration?P.getDuration():0,d=Math.round(c.duration-dur);
+  lines=parseLRC(c.syncedLyrics);reset();
+  setMsg(`Version ${ci+1}/${cands.length} : ${c.trackName} – ${c.artistName}`+(dur?` (durée ${d>0?"+":""}${d} s par rapport à la vidéo)`:"")
+    +(dur&&Math.abs(d)>3?". Écart important : essaie « Autre version » ou « Calibrer ».":""));
+  tick(true)}
+
 async function search(){
   const ti=$("#ti").value.trim(),ar=$("#ar").value.trim(),enc=encodeURIComponent;
   if(!ti)return setMsg("Entre un titre, puis appuie sur Chercher.");
-  setMsg("Recherche des paroles…");lines=[];idx=-2;render();
+  setMsg("Recherche des paroles…");lines=[];cands=[];reset();render();
   const dur=P&&P.getDuration?P.getDuration():0;
   const tries=[`track_name=${enc(ti)}&artist_name=${enc(ar)}`,`q=${enc(ar+" "+ti)}`,`q=${enc(ti)}`];
   try{
@@ -195,22 +266,41 @@ async function search(){
       const r=await fetch("https://lrclib.net/api/search?"+q);if(!r.ok)continue;
       const j=(await r.json()).filter(x=>x.syncedLyrics);if(!j.length)continue;
       if(dur>0)j.sort((a,b)=>Math.abs(a.duration-dur)-Math.abs(b.duration-dur));
-      lines=parseLRC(j[0].syncedLyrics);idx=-2;
-      setMsg(`Paroles trouvées : ${j[0].trackName} – ${j[0].artistName}`);tick(true);return}
+      cands=j.slice(0,8);useCand(0);return}
     setMsg("Aucune parole synchronisée trouvée. Corrige l’artiste ou le titre, ou colle un fichier .lrc plus bas.")
   }catch(e){setMsg("Impossible de joindre LRCLIB. Vérifie la connexion.")}}
 
 $("#go").onclick=()=>{const id=ytId($("#url").value);
   if(!id)return setMsg("Lien YouTube non reconnu.");
-  vid=id;autoFor=null;lines=[];idx=-2;render();setMsg("Chargement de la vidéo… appuie sur lecture si elle ne démarre pas.");boot()};
+  vid=id;autoFor=null;lines=[];cands=[];reset();calib=null;$("#cal").textContent="Calibrer";
+  seed=[...id].reduce((a,x)=>a+x.charCodeAt(0),0);S.off=OFFS[id]||0;apply();
+  setMsg("Chargement de la vidéo… appuie sur lecture si elle ne démarre pas.");boot()};
 $("#url").addEventListener("keydown",e=>{if(e.key==="Enter")$("#go").click()});
 $("#se").onclick=search;
+$("#alt").onclick=()=>cands.length>1?useCand(ci+1):setMsg("Pas d’autre version trouvée.");
+$("#syn").addEventListener("click",e=>{const o=e.target.dataset.o;if(o)setOff(S.off+ +o)});
+$("#cal").onclick=()=>{
+  if(!lines.length)return setMsg("Charge d’abord des paroles.");
+  if(!calib){const f=lines.find(l=>l.s!=="♪")||lines[0];calib=f;
+    if(P&&P.seekTo)P.seekTo(Math.max(0,f.t-S.off-5),true);
+    setMsg(`Appuie sur « Maintenant ! » dès que tu entends : « ${f.s} »`);$("#cal").textContent="Maintenant !";return}
+  const T=P&&P.getCurrentTime?P.getCurrentTime():0;setOff(calib.t-(T-.2));
+  calib=null;$("#cal").textContent="Calibrer";setMsg(`Synchro calibrée (décalage ${S.off} s), enregistrée pour cette vidéo.`)};
 $("#use").onclick=()=>{const l=parseLRC($("#lrc").value);
   if(!l.length)return setMsg("Aucune ligne reconnue. Format attendu : [mm:ss.xx] texte");
-  lines=l;idx=-2;setMsg("Paroles personnalisées chargées.");tick(true)};
+  lines=l;cands=[];reset();setMsg("Paroles personnalisées chargées.");tick(true)};
 $("#rst").onclick=()=>{C.forEach(c=>S[c[1]]=c[3]);save();apply()};
-$("#cl").onclick=()=>document.body.classList.add("clean");
-$("#back").onclick=()=>document.body.classList.remove("clean");
+
+function setFull(on){B.classList.toggle("full",on);B.classList.toggle("hidev",on);B.classList.remove("clean");
+  try{if(on){const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();r&&r.catch&&r.catch(()=>{})}
+      else if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
+  setTimeout(fit,50)}
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&B.classList.contains("full")){B.classList.remove("full","hidev");fit()}});
+addEventListener("resize",fit);
+$("#fs2").onclick=()=>setFull(true);
+$("#cl").onclick=()=>{B.classList.add("clean");setTimeout(fit,50)};
+$("#tv").onclick=()=>B.classList.toggle("hidev");
+$("#ex").onclick=()=>{if(B.classList.contains("full"))setFull(false);B.classList.remove("clean","full","hidev");setTimeout(fit,50)};
 
 apply();
 </script>
